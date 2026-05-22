@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>River of Life Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Patrick Hand', system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, #fff4d6 0, transparent 40%),
+      radial-gradient(circle at 80% 90%, #cfe8ff 0, transparent 50%),
+      linear-gradient(180deg, #e8f4ff 0%, #fff8e7 100%);
+    min-height: 100vh;
+    color: #2c3e50;
+    overflow-x: hidden;
+  }
+
+  /* ============== SETUP SCREEN ============== */
+  #setup {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 28px 22px 80px;
+  }
+  h1.app-title {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(48px, 7vw, 80px);
+    text-align: center;
+    color: #1a5490;
+    margin: 18px 0 4px;
+    text-shadow: 3px 3px 0 rgba(255,255,255,0.7), 4px 4px 0 rgba(26,84,144,0.12);
+    line-height: 1;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 22px;
+    color: #5d6d7e;
+    margin: 0 0 30px;
+  }
+  .card {
+    background: #fffef5;
+    border: 3px solid #2c3e50;
+    border-radius: 22px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    box-shadow: 5px 5px 0 rgba(44,62,80,0.18);
+    position: relative;
+  }
+  .card h2 {
+    font-family: 'Caveat', cursive;
+    font-size: 36px;
+    margin: 0 0 6px;
+    color: #1a5490;
+  }
+  .card .card-blurb {
+    color: #5d6d7e;
+    font-size: 17px;
+    margin: 0 0 14px;
+  }
+  label {
+    display: block;
+    font-size: 20px;
+    margin: 12px 0 4px;
+    color: #1a5490;
+    font-weight: 700;
+  }
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 18px;
+    border: 2px solid #2c3e50;
+    border-radius: 10px;
+    background: #fff;
+    color: inherit;
+    outline: none;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    box-shadow: 0 0 0 3px #ffd96677;
+    border-color: #1a5490;
+  }
+  textarea { resize: vertical; min-height: 58px; line-height: 1.35; }
+  input[type="range"] { width: 100%; }
+
+  button {
+    font-family: inherit;
+    font-size: 19px;
+    padding: 9px 20px;
+    border: 3px solid #2c3e50;
+    background: #ffd966;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #2c3e50;
+    transition: transform 0.1s, box-shadow 0.1s;
+    color: #2c3e50;
+  }
+  button:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #2c3e50; }
+  button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #2c3e50; }
+  button.danger { background: #ff9d9d; }
+  button.secondary { background: #b4dffa; }
+  button.big {
+    font-size: 26px;
+    padding: 14px 32px;
+    font-family: 'Caveat', cursive;
+    background: linear-gradient(180deg, #ffe082 0%, #ffc94d 100%);
+  }
+  button.icon-btn {
+    padding: 4px 10px;
+    font-size: 18px;
+    box-shadow: 2px 2px 0 #2c3e50;
+  }
+
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .row > .col { flex: 1 1 200px; min-width: 0; }
+
+  /* ============ MILESTONES LIST ============ */
+  .milestone-card {
+    border: 2px dashed #5d6d7e;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    background: #fafdff;
+    position: relative;
+  }
+  .milestone-card .mc-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+  }
+  .milestone-card .mc-head .index {
+    font-family: 'Caveat', cursive;
+    font-size: 26px;
+    color: #1a5490;
+  }
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .type-grid label {
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid #ccd;
+    border-radius: 12px;
+    padding: 8px 4px;
+    background: #fff;
+    margin: 0;
+    font-size: 14px;
+    color: #2c3e50;
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .type-grid label:hover { border-color: #5d6d7e; }
+  .type-grid label.chosen {
+    border-color: #1a5490;
+    background: #fff3a6;
+    box-shadow: 2px 2px 0 #2c3e50;
+  }
+  .type-grid label input { display: none; }
+  .type-grid label .icon { font-size: 26px; display: block; line-height: 1.05; }
+
+  .time-slider-wrap {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .time-slider-wrap input[type="range"] { flex: 1; }
+  .time-slider-wrap .pct {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: #1a5490;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #5d6d7e;
+    font-style: italic;
+    font-size: 18px;
+  }
+
+  .actions {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin: 30px 0 10px;
+  }
+
+  .small-note {
+    font-size: 15px;
+    color: #5d6d7e;
+    margin-top: 6px;
+  }
+
+  .checkbox-line {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px;
+    color: #2c3e50;
+  }
+  .checkbox-line input { width: 20px; height: 20px; accent-color: #1a5490; }
+
+  /* ============ SIM SCREEN ============ */
+  #sim {
+    position: fixed;
+    inset: 0;
+    background: #cfe8ff;
+    overflow: hidden;
+  }
+  #canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #sim-controls {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    gap: 10px;
+    z-index: 5;
+  }
+  #download-link {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 5;
+    text-decoration: none;
+    display: none;
+  }
+  #download-link.show { display: inline-block; }
+
+  /* ============ HEADER ART ============ */
+  .header-art {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .header-art svg {
+    max-width: 100%;
+    height: 70px;
+  }
+
+  @media (max-width: 600px) {
+    .card { padding: 18px 16px; }
+    button.big { font-size: 22px; padding: 12px 22px; }
+  }
+
+  /* ============ MAP MODAL ============ */
+  #map-modal {
+    position: fixed; inset: 0;
+    background: rgba(15, 25, 45, 0.7);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px;
+  }
+  #map-modal[hidden] { display: none; }
+  .map-modal-body {
+    background: #fffef5;
+    border: 3px solid #2c3e50;
+    border-radius: 22px;
+    padding: 18px 22px 22px;
+    max-width: 96vw;
+    max-height: 96vh;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.28);
+    display: flex; flex-direction: column;
+    gap: 14px;
+  }
+  .map-modal-body h2 {
+    font-family: 'Caveat', cursive;
+    font-size: 38px;
+    margin: 0;
+    color: #1a5490;
+    text-align: center;
+    line-height: 1.05;
+  }
+  .map-canvas-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    background: #f5e9c4;
+    border: 2px solid #2c3e50;
+    border-radius: 14px;
+    text-align: center;
+    padding: 10px;
+  }
+  #map-canvas {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px rgba(44,62,80,0.15);
+  }
+  .map-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ SETUP ============================ -->
+<div id="setup">
+  <h1 class="app-title">~ My River of Life ~</h1>
+  <p class="subtitle">Imagine your life as a river that led you to this moment.</p>
+
+  <div class="card">
+    <h2>The story of your river</h2>
+    <p class="card-blurb">Every river has a source and somewhere it's flowing toward.</p>
+
+    <label for="story-title">A title for your journey</label>
+    <input id="story-title" type="text" value="My River of Life" />
+
+    <label for="story-start">Where did your river start?</label>
+    <textarea id="story-start" placeholder="The source / spring of your life: where, when, who...">A small house and a big garden, with the voices of family teaching me how to look at the world.</textarea>
+
+    <label for="story-end">Where is it leading?</label>
+    <textarea id="story-end" placeholder="Where your river is flowing next, your hopes, dreams, calling...">Toward a wider ocean — carrying what I've learned into the rooms I walk into next.</textarea>
+
+    <div class="row" style="margin-top:6px;">
+      <div class="col">
+        <label for="duration">Journey duration</label>
+        <select id="duration">
+          <option value="20">20 seconds</option>
+          <option value="30" selected>30 seconds</option>
+          <option value="45">45 seconds</option>
+          <option value="60">60 seconds</option>
+          <option value="90">90 seconds</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="theme">Time of day</label>
+        <select id="theme">
+          <option value="day" selected>☀️ Bright day</option>
+          <option value="sunset">🌅 Golden sunset</option>
+          <option value="night">🌙 Starry night</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="weather">Mood</label>
+        <select id="weather">
+          <option value="clear" selected>🍃 Clear & breezy</option>
+          <option value="clouds">☁️ Cloudy</option>
+          <option value="rain">🌧️ Rainy</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;" class="checkbox-line">
+      <input type="checkbox" id="record-toggle" />
+      <label for="record-toggle" style="margin:0;font-weight:400;color:#2c3e50;">Record a video while playing (downloads as .webm)</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Milestones along your river</h2>
+    <p class="card-blurb">
+      Add the moments, people, decisions, supports, and obstacles you've encountered.
+      Use the slider to place each on your timeline.
+    </p>
+
+    <div id="milestones-list"></div>
+
+    <div style="text-align:center; margin-top:14px;">
+      <button id="add-milestone">+ Add a milestone</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="map-btn" class="big secondary">🗺️ Generate Map</button>
+    <button id="start-btn" class="big">🚣 Start the Journey →</button>
+  </div>
+  <div class="actions" style="margin-top:-6px;">
+    <button id="export-btn" class="secondary">⬇ Export as JSON</button>
+    <button id="import-btn" class="secondary">⬆ Import JSON</button>
+    <input id="import-file" type="file" accept=".json,application/json" hidden />
+  </div>
+  <p class="small-note" style="text-align:center;">
+    Tip: After the journey ends you can play it again, edit your milestones, or download the recorded video. Export your inputs as JSON to save them, or import a file to pick up where you left off.
+  </p>
+</div>
+
+<!-- ============================ SIMULATION ============================ -->
+<div id="sim" hidden>
+  <canvas id="canvas"></canvas>
+  <div id="sim-controls">
+    <button id="back-btn" class="secondary">← Edit</button>
+    <button id="replay-btn">↻ Replay</button>
+  </div>
+  <a id="download-link" download="river-of-life.webm">
+    <button>⬇ Download video</button>
+  </a>
+</div>
+
+<!-- ============================ MAP MODAL ============================ -->
+<div id="map-modal" hidden>
+  <div class="map-modal-body">
+    <h2>Your River of Life — Map</h2>
+    <div class="map-canvas-wrap">
+      <canvas id="map-canvas"></canvas>
+    </div>
+    <div class="map-actions">
+      <button id="map-download-btn">⬇ Download PNG</button>
+      <button id="map-close-btn" class="secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====================================================================
+   RIVER OF LIFE — single-file simulator
+   ==================================================================== */
+
+// ---------- Milestone type catalog ----------
+const MILESTONE_TYPES = {
+  calm:      { label: 'Calm pool',     icon: '🌊', popup: 'gentle' },
+  rock:      { label: 'Rock',          icon: '🪨', popup: 'bump' },
+  waterfall: { label: 'Waterfall',     icon: '💦', popup: 'shake' },
+  tree:      { label: 'Fallen tree',   icon: '🌳', popup: 'thud' },
+  bridge:    { label: 'Bridge',        icon: '🌉', popup: 'arch' },
+  island:    { label: 'Island',        icon: '🏝️', popup: 'grow' },
+  person:    { label: 'Person',        icon: '👋', popup: 'wave' },
+  star:      { label: 'Bright moment', icon: '⭐', popup: 'sparkle' },
+  fork:      { label: 'Fork / choice', icon: '🪧', popup: 'tilt' },
+  dam:       { label: 'Dam / block',   icon: '🧱', popup: 'block' }
+};
+const TYPE_KEYS = Object.keys(MILESTONE_TYPES);
+
+// ---------- Images ----------
+const IMG_BOAT = new Image();
+IMG_BOAT.src = 'assets/boat.png';
+const IMG_RIVER = new Image();
+IMG_RIVER.src = 'assets/river_part.png';
+
+let imagesReady = 0;
+function imgReady() { imagesReady++; }
+IMG_BOAT.onload = imgReady;
+IMG_RIVER.onload = imgReady;
+
+// ---------- App state ----------
+const app = {
+  title: '',
+  startText: '',
+  endText: '',
+  duration: 30,
+  theme: 'day',
+  weather: 'clear',
+  record: false,
+  milestones: []  // {id, type, title, description, t} where t is 0..1
+};
+
+let nextId = 1;
+function uid() { return nextId++; }
+
+// =========================================================
+// SETUP UI
+// =========================================================
+const listEl = document.getElementById('milestones-list');
+
+function renderMilestones() {
+  listEl.innerHTML = '';
+  if (app.milestones.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'empty-state';
+    div.textContent = 'No milestones yet — every life has a few twists. Add one below!';
+    listEl.appendChild(div);
+    return;
+  }
+  app.milestones.forEach((m, i) => listEl.appendChild(buildMilestoneCard(m, i)));
+}
+
+function buildMilestoneCard(m, idx) {
+  const card = document.createElement('div');
+  card.className = 'milestone-card';
+  card.dataset.id = m.id;
+
+  const head = document.createElement('div');
+  head.className = 'mc-head';
+  head.innerHTML = `
+    <span class="index">Milestone ${idx + 1}</span>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn secondary" data-act="up"   title="Earlier">↑</button>
+      <button class="icon-btn secondary" data-act="down" title="Later">↓</button>
+      <button class="icon-btn danger"    data-act="del"  title="Remove">✕</button>
+    </div>
+  `;
+  card.appendChild(head);
+
+  // Title
+  const titleLabel = document.createElement('label');
+  titleLabel.textContent = 'Title';
+  card.appendChild(titleLabel);
+  const titleInput = document.createElement('input');
+  titleInput.type = 'text';
+  titleInput.value = m.title;
+  titleInput.placeholder = 'A short name for this moment';
+  titleInput.addEventListener('input', e => { m.title = e.target.value; });
+  card.appendChild(titleInput);
+
+  // Description
+  const descLabel = document.createElement('label');
+  descLabel.textContent = 'Description';
+  card.appendChild(descLabel);
+  const descInput = document.createElement('textarea');
+  descInput.value = m.description;
+  descInput.placeholder = 'A sentence describing what happened, who was there, how it felt...';
+  descInput.addEventListener('input', e => { m.description = e.target.value; });
+  card.appendChild(descInput);
+
+  // Type
+  const typeLabel = document.createElement('label');
+  typeLabel.textContent = 'Kind of moment';
+  card.appendChild(typeLabel);
+  const grid = document.createElement('div');
+  grid.className = 'type-grid';
+  TYPE_KEYS.forEach(k => {
+    const info = MILESTONE_TYPES[k];
+    const opt = document.createElement('label');
+    opt.className = (m.type === k) ? 'chosen' : '';
+    opt.innerHTML = `
+      <input type="radio" name="type-${m.id}" value="${k}" ${m.type === k ? 'checked' : ''}>
+      <span class="icon">${info.icon}</span>
+      <span>${info.label}</span>
+    `;
+    opt.addEventListener('click', () => {
+      m.type = k;
+      grid.querySelectorAll('label').forEach(l => l.classList.remove('chosen'));
+      opt.classList.add('chosen');
+    });
+    grid.appendChild(opt);
+  });
+  card.appendChild(grid);
+
+  // Position slider
+  const posLabel = document.createElement('label');
+  posLabel.textContent = 'When in your journey?';
+  card.appendChild(posLabel);
+  const slideWrap = document.createElement('div');
+  slideWrap.className = 'time-slider-wrap';
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = 0; slider.max = 100; slider.value = Math.round(m.t * 100);
+  const pct = document.createElement('span');
+  pct.className = 'pct';
+  const updatePct = () => { pct.textContent = `${slider.value}%`; };
+  updatePct();
+  slider.addEventListener('input', e => {
+    m.t = parseInt(e.target.value, 10) / 100;
+    updatePct();
+  });
+  slideWrap.appendChild(slider);
+  slideWrap.appendChild(pct);
+  card.appendChild(slideWrap);
+
+  // Actions
+  head.querySelector('[data-act="del"]').addEventListener('click', () => {
+    app.milestones = app.milestones.filter(x => x.id !== m.id);
+    renderMilestones();
+  });
+  head.querySelector('[data-act="up"]').addEventListener('click', () => {
+    if (idx === 0) return;
+    [app.milestones[idx - 1], app.milestones[idx]] = [app.milestones[idx], app.milestones[idx - 1]];
+    renderMilestones();
+  });
+  head.querySelector('[data-act="down"]').addEventListener('click', () => {
+    if (idx === app.milestones.length - 1) return;
+    [app.milestones[idx + 1], app.milestones[idx]] = [app.milestones[idx], app.milestones[idx + 1]];
+    renderMilestones();
+  });
+
+  return card;
+}
+
+document.getElementById('add-milestone').addEventListener('click', () => {
+  const evenly = app.milestones.length === 0 ? 0.5
+    : Math.min(0.95, ((app.milestones[app.milestones.length - 1].t || 0) + 0.15));
+  app.milestones.push({
+    id: uid(),
+    type: TYPE_KEYS[app.milestones.length % TYPE_KEYS.length],
+    title: '',
+    description: '',
+    t: evenly
+  });
+  renderMilestones();
+  listEl.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+// Seed with a few example milestones
+function seedExamples() {
+  const seeds = [
+    { type: 'calm',      title: 'Childhood summers',         description: 'Long, easy days. Family close, simple joys, the world feeling kind and curious.',                                 t: 0.08 },
+    { type: 'person',    title: 'A teacher who saw me',      description: 'Someone handed me a book, a question, or a chance — and quietly changed everything.',                            t: 0.20 },
+    { type: 'rock',      title: 'A hard year',               description: 'Things broke open. I had to learn how to rebuild without a map.',                                                 t: 0.32 },
+    { type: 'waterfall', title: 'A leap of faith',           description: 'I stepped off a familiar edge into something that felt huge and unknown.',                                        t: 0.44 },
+    { type: 'fork',      title: 'A big decision',            description: 'I left a safe path for one that felt true. Scary, then steady.',                                                  t: 0.56 },
+    { type: 'bridge',    title: 'A community appeared',      description: 'Friends, mentors, and collaborators carried me when I couldn\'t carry myself.',                                   t: 0.68 },
+    { type: 'island',    title: 'A pause to find my bearings', description: 'A season of rest and reflection that turned out to be its own kind of progress.',                              t: 0.80 },
+    { type: 'star',      title: 'Where I am now',            description: 'Stepping into the next chapter with curiosity, gratitude, and a story worth sharing.',                            t: 0.92 }
+  ];
+  seeds.forEach(s => app.milestones.push({ id: uid(), ...s }));
+}
+seedExamples();
+renderMilestones();
+
+// =========================================================
+// START / END
+// =========================================================
+document.getElementById('start-btn').addEventListener('click', () => {
+  app.title = document.getElementById('story-title').value.trim() || 'My River of Life';
+  app.startText = document.getElementById('story-start').value.trim();
+  app.endText = document.getElementById('story-end').value.trim();
+  app.duration = parseInt(document.getElementById('duration').value, 10);
+  app.theme = document.getElementById('theme').value;
+  app.weather = document.getElementById('weather').value;
+  app.record = document.getElementById('record-toggle').checked;
+  startSimulation();
+});
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  stopSimulation();
+  document.getElementById('sim').hidden = true;
+  document.getElementById('setup').hidden = false;
+  document.getElementById('download-link').classList.remove('show');
+});
+document.getElementById('replay-btn').addEventListener('click', () => {
+  stopSimulation();
+  document.getElementById('download-link').classList.remove('show');
+  startSimulation();
+});
+
+// =========================================================
+// EXPORT / IMPORT JSON
+// =========================================================
+document.getElementById('export-btn').addEventListener('click', () => {
+  const data = {
+    version: 1,
+    title: document.getElementById('story-title').value,
+    startText: document.getElementById('story-start').value,
+    endText: document.getElementById('story-end').value,
+    duration: parseInt(document.getElementById('duration').value, 10),
+    theme: document.getElementById('theme').value,
+    weather: document.getElementById('weather').value,
+    milestones: app.milestones.map(({ id, ...rest }) => rest)
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const safe = (data.title || 'river-of-life')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${safe || 'river-of-life'}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    applyImport(data);
+  } catch (err) {
+    alert('Could not read that file:\n' + err.message);
+  }
+});
+
+function applyImport(data) {
+  if (!data || typeof data !== 'object') {
+    alert('That file does not look like a River of Life export.');
+    return;
+  }
+  const setVal = (id, v) => { if (v !== undefined && v !== null) document.getElementById(id).value = String(v); };
+  setVal('story-title', data.title);
+  setVal('story-start', data.startText);
+  setVal('story-end', data.endText);
+  setVal('duration', data.duration);
+  setVal('theme', data.theme);
+  setVal('weather', data.weather);
+  if (Array.isArray(data.milestones)) {
+    app.milestones = data.milestones.map(m => ({
+      id: uid(),
+      type: TYPE_KEYS.includes(m.type) ? m.type : TYPE_KEYS[0],
+      title: typeof m.title === 'string' ? m.title : '',
+      description: typeof m.description === 'string' ? m.description : '',
+      t: typeof m.t === 'number' ? Math.max(0, Math.min(1, m.t)) : 0.5
+    }));
+    renderMilestones();
+  }
+}
+
+// =========================================================
+// CANVAS / SIMULATION
+// =========================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let W = 0, H = 0, DPR = 1;
+function fitCanvas() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(canvas.clientWidth * DPR);
+  canvas.height = Math.floor(canvas.clientHeight * DPR);
+  W = canvas.width; H = canvas.height;
+}
+window.addEventListener('resize', () => { if (!document.getElementById('sim').hidden) fitCanvas(); });
+
+let simRAF = 0;
+let simStartTime = 0;
+let simRunning = false;
+let recorder = null;
+let recordedChunks = [];
+let totalDuration = 0;  // seconds including intro/outro
+const INTRO = 3;
+const OUTRO = 4;
+
+function startSimulation() {
+  document.getElementById('setup').hidden = true;
+  document.getElementById('sim').hidden = false;
+  fitCanvas();
+  totalDuration = INTRO + app.duration + OUTRO;
+  simStartTime = performance.now();
+  simRunning = true;
+
+  if (app.record) startRecording();
+
+  cancelAnimationFrame(simRAF);
+  simRAF = requestAnimationFrame(loop);
+}
+
+function stopSimulation() {
+  simRunning = false;
+  cancelAnimationFrame(simRAF);
+  stopRecording();
+}
+
+function loop(now) {
+  if (!simRunning) return;
+  const elapsed = (now - simStartTime) / 1000;
+  draw(elapsed);
+  if (elapsed >= totalDuration) {
+    simRunning = false;
+    stopRecording();
+    return;
+  }
+  simRAF = requestAnimationFrame(loop);
+}
+
+// =========================================================
+// RECORDING
+// =========================================================
+function startRecording() {
+  try {
+    const stream = canvas.captureStream(30);
+    recordedChunks = [];
+    let mime = 'video/webm;codecs=vp9';
+    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
+    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
+    recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
+    recorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    recorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById('download-link');
+      link.href = url;
+      link.classList.add('show');
+    };
+    recorder.start();
+  } catch (err) {
+    console.warn('Recording failed:', err);
+    recorder = null;
+  }
+}
+function stopRecording() {
+  if (recorder && recorder.state !== 'inactive') {
+    try { recorder.stop(); } catch (e) { /* ignore */ }
+  }
+}
+
+// =========================================================
+// RENDERING HELPERS
+// =========================================================
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function wrapLines(text, font, maxWidth) {
+  ctx.font = font;
+  const words = (text || '').split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function easeOutBack(x) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+// =========================================================
+// SCENE DRAWING
+// =========================================================
+
+// Background sky / sun / moon / stars
+function drawSky(time) {
+  const theme = app.theme;
+  let top, mid, bot;
+  if (theme === 'sunset') { top = '#ffb37a'; mid = '#ffd9a8'; bot = '#fff1d4'; }
+  else if (theme === 'night') { top = '#0e1a3a'; mid = '#1f2f5a'; bot = '#37528a'; }
+  else { top = '#a8d8f5'; mid = '#cbe7fb'; bot = '#eaf4ff'; }
+  const g = ctx.createLinearGradient(0, 0, 0, H * 0.7);
+  g.addColorStop(0, top);
+  g.addColorStop(0.6, mid);
+  g.addColorStop(1, bot);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H * 0.72);
+
+  if (theme === 'night') drawStars(time);
+  drawSunOrMoon(time);
+  if (app.weather === 'clouds' || app.weather === 'rain') drawClouds(time);
+  if (theme !== 'night') drawClouds(time, 0.7);
+  if (app.weather === 'rain') drawRain(time);
+}
+
+function drawStars(time) {
+  ctx.save();
+  for (let i = 0; i < 40; i++) {
+    const x = ((i * 173) % 1000) / 1000 * W;
+    const y = ((i * 91) % 400) / 1000 * H;
+    const tw = 0.5 + 0.5 * Math.sin(time * 2 + i);
+    ctx.globalAlpha = 0.6 + 0.4 * tw;
+    ctx.fillStyle = '#fff8d2';
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5 * DPR + tw * DPR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSunOrMoon(time) {
+  const r = 36 * DPR;
+  const cx = W * 0.83;
+  const cy = H * 0.18;
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (app.theme === 'night') {
+    ctx.fillStyle = '#fdf6c5';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * DPR;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#eee8a8';
+    [[-10, -8, 6], [10, 6, 5], [4, 14, 4]].forEach(([x, y, rr]) => {
+      ctx.beginPath();
+      ctx.arc(x * DPR, y * DPR, rr * DPR, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  } else {
+    ctx.strokeStyle = app.theme === 'sunset' ? '#ff7a3d' : '#ffae33';
+    ctx.lineWidth = 4 * DPR;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2 + time * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * r * 1.25, Math.sin(a) * r * 1.25);
+      ctx.lineTo(Math.cos(a) * r * 1.55, Math.sin(a) * r * 1.55);
+      ctx.stroke();
+    }
+    ctx.fillStyle = app.theme === 'sunset' ? '#ff8c4d' : '#ffd34d';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * DPR;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Smile
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * DPR;
+    ctx.beginPath();
+    ctx.arc(0, 4 * DPR, 14 * DPR, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.stroke();
+    // Eyes
+    ctx.fillStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.arc(-11 * DPR, -7 * DPR, 3 * DPR, 0, Math.PI * 2);
+    ctx.arc( 11 * DPR, -7 * DPR, 3 * DPR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawCloud(cx, cy, scale) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = app.theme === 'night' ? '#5a6a8c' : '#fff';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3;
+  const lobes = [[-30, 0, 22], [-10, -10, 26], [12, -5, 22], [28, 5, 18]];
+  ctx.beginPath();
+  lobes.forEach(([x, y, r], i) => {
+    if (i === 0) ctx.moveTo(x + r, y);
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+  });
+  ctx.fill();
+  // Single outline pass
+  lobes.forEach(([x, y, r]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+const CLOUD_DATA = Array.from({ length: 6 }, (_, i) => ({
+  x: (i * 0.18 + 0.05),
+  y: 0.05 + ((i * 13) % 7) / 60,
+  s: 0.7 + ((i * 17) % 5) / 10,
+  v: 0.005 + ((i * 11) % 4) / 200
+}));
+function drawClouds(time, opacity = 1) {
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  CLOUD_DATA.forEach((c) => {
+    const x = ((c.x + time * c.v) % 1.15 - 0.075) * W;
+    const y = c.y * H + Math.sin(time * 0.5 + c.x * 10) * 4 * DPR;
+    drawCloud(x, y, c.s * DPR);
+  });
+  ctx.restore();
+}
+
+function drawRain(time) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(180,210,255,0.55)';
+  ctx.lineWidth = 1.5 * DPR;
+  const seed = Math.floor(time * 20);
+  for (let i = 0; i < 60; i++) {
+    const r = ((i * 263 + seed * 41) % 1000) / 1000;
+    const r2 = ((i * 127 + seed * 7) % 1000) / 1000;
+    const x = r * W;
+    const y = (r2 * 0.7 + (time * 1.5) % 1) * H % (H * 0.7);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 4 * DPR, y + 12 * DPR);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Distant hills (parallax)
+function drawHills(time, scrollX) {
+  const baseY = H * 0.5;
+  // back layer
+  ctx.fillStyle = app.theme === 'night' ? '#27365a' : '#9bc798';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3 * DPR;
+  drawHillLayer(baseY, 0.35 * H, 280 * DPR, scrollX * 0.15);
+  // front layer
+  ctx.fillStyle = app.theme === 'night' ? '#1c2a47' : '#7eb87a';
+  drawHillLayer(baseY + 30 * DPR, 0.25 * H, 180 * DPR, scrollX * 0.3);
+}
+
+function drawHillLayer(baseY, amp, period, offset) {
+  ctx.beginPath();
+  ctx.moveTo(-10, H);
+  for (let x = -10; x <= W + 10; x += 12) {
+    const t = (x + offset) / period;
+    const y = baseY - amp * (0.5 + 0.5 * Math.sin(t * Math.PI * 2))
+                    - amp * 0.3 * Math.sin(t * Math.PI * 5.7);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W + 10, H);
+  ctx.closePath();
+  ctx.fill();
+  // outline along top
+  ctx.beginPath();
+  for (let x = -10; x <= W + 10; x += 12) {
+    const t = (x + offset) / period;
+    const y = baseY - amp * (0.5 + 0.5 * Math.sin(t * Math.PI * 2))
+                    - amp * 0.3 * Math.sin(t * Math.PI * 5.7);
+    if (x === -10) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+// Riverbanks (a strip of grassy bank in front of the hills)
+function drawBanks(time, scrollX) {
+  const y = H * 0.62;
+  ctx.fillStyle = app.theme === 'night' ? '#15203a' : '#dbe69c';
+  ctx.fillRect(0, y, W, H * 0.04);
+  ctx.fillStyle = app.theme === 'night' ? '#0e1a30' : '#c4d57b';
+  ctx.fillRect(0, y + H * 0.035, W, H * 0.012);
+
+  // little grass tufts scrolling
+  ctx.strokeStyle = app.theme === 'night' ? '#3b5a3a' : '#6a8a3a';
+  ctx.lineWidth = 2 * DPR;
+  const spacing = 60 * DPR;
+  const off = ((scrollX * 0.45) % spacing + spacing) % spacing;
+  for (let x = -off; x < W + spacing; x += spacing) {
+    const yy = y + 6 * DPR;
+    ctx.beginPath();
+    ctx.moveTo(x, yy);
+    ctx.lineTo(x - 4 * DPR, yy - 10 * DPR);
+    ctx.moveTo(x, yy);
+    ctx.lineTo(x, yy - 12 * DPR);
+    ctx.moveTo(x, yy);
+    ctx.lineTo(x + 4 * DPR, yy - 10 * DPR);
+    ctx.stroke();
+  }
+}
+
+// Water body
+function drawWaterBase(time) {
+  const top = H * 0.66;
+  ctx.fillStyle = app.theme === 'night' ? '#274168' : '#7cc4ee';
+  ctx.fillRect(0, top, W, H - top);
+  // shimmer band
+  const g = ctx.createLinearGradient(0, top, 0, H);
+  g.addColorStop(0, app.theme === 'night' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.5)');
+  g.addColorStop(0.15, 'rgba(255,255,255,0)');
+  g.addColorStop(1, app.theme === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, top, W, H - top);
+}
+
+// River waves using the river_part.png, tiled and scrolling
+function drawRiverWaves(time, scrollX, yFrac, opacity, speedMul, scale) {
+  if (!IMG_RIVER.complete || !IMG_RIVER.naturalWidth) return;
+  const tileW = IMG_RIVER.naturalWidth * scale;
+  const tileH = IMG_RIVER.naturalHeight * scale;
+  const y = H * yFrac - tileH / 2;
+  const off = ((scrollX * speedMul) % tileW + tileW) % tileW;
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  for (let x = -off - tileW; x < W + tileW; x += tileW * 0.98) {
+    ctx.drawImage(IMG_RIVER, x, y, tileW, tileH);
+  }
+  ctx.restore();
+}
+
+// Boat with bobbing & subtle tilt
+function drawBoat(time) {
+  if (!IMG_BOAT.complete || !IMG_BOAT.naturalWidth) return;
+  const cx = W / 2;
+  const cy = H * 0.68;
+  const bob = Math.sin(time * 2.2) * 6 * DPR;
+  const tilt = Math.sin(time * 2.2 + 0.5) * 0.04;
+  const boatW = Math.min(W * 0.28, 380 * DPR);
+  const boatH = boatW * (IMG_BOAT.naturalHeight / IMG_BOAT.naturalWidth);
+  ctx.save();
+  ctx.translate(cx, cy + bob);
+  ctx.rotate(tilt);
+  // Reflection
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.scale(1, -0.4);
+  ctx.translate(0, -boatH * 0.95);
+  ctx.drawImage(IMG_BOAT, -boatW / 2, -boatH / 2, boatW, boatH);
+  ctx.restore();
+  // Boat
+  ctx.drawImage(IMG_BOAT, -boatW / 2, -boatH / 2, boatW, boatH);
+  ctx.restore();
+
+  // Small splash beside boat
+  ctx.save();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3 * DPR;
+  ctx.lineCap = 'round';
+  const sx = cx + boatW * 0.42;
+  const sy = cy + bob + boatH * 0.28;
+  const splashT = (time * 3) % 1;
+  ctx.globalAlpha = 1 - splashT;
+  for (let i = 0; i < 4; i++) {
+    const a = -Math.PI / 2 + (i - 1.5) * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + Math.cos(a) * 18 * DPR * splashT, sy + Math.sin(a) * 14 * DPR * splashT);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// =========================================================
+// MILESTONE SCENE ELEMENTS
+// =========================================================
+// Each draw function takes (x, y, scale, time, life)
+//   life: -1 (just appearing on right) to 0 (at boat) to +1 (left exit)
+//   localTime: time since milestone became visible
+
+function drawByType(type, x, y, scale, time, life) {
+  const fn = SCENE_DRAW[type] || SCENE_DRAW.rock;
+  fn(x, y, scale, time, life);
+}
+
+const SCENE_DRAW = {
+  rock(x, y, s, time, life) {
+    const wobble = Math.sin(time * 2 + x) * 1.5;
+    ctx.save();
+    ctx.translate(x, y + wobble);
+    // splash at base when near
+    if (Math.abs(life) < 0.5) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2 * s;
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + (i - 2) * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(0, 24 * s);
+        ctx.lineTo(Math.cos(a) * 28 * s, 24 * s + Math.sin(a) * 18 * s);
+        ctx.stroke();
+      }
+    }
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(0, 28 * s, 50 * s, 8 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // rock body
+    ctx.fillStyle = '#9a9a9a';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.moveTo(-45 * s, 22 * s);
+    ctx.quadraticCurveTo(-55 * s, -8 * s, -25 * s, -28 * s);
+    ctx.quadraticCurveTo(10 * s, -38 * s, 38 * s, -16 * s);
+    ctx.quadraticCurveTo(58 * s, 12 * s, 42 * s, 24 * s);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // highlight
+    ctx.fillStyle = '#bdbdbd';
+    ctx.beginPath();
+    ctx.ellipse(-10 * s, -12 * s, 14 * s, 5 * s, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    // crack
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1.5 * s;
+    ctx.beginPath();
+    ctx.moveTo(6 * s, -18 * s); ctx.lineTo(12 * s, 0); ctx.lineTo(22 * s, 14 * s);
+    ctx.stroke();
+    ctx.restore();
+  },
+
+  tree(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // floating log
+    ctx.fillStyle = '#8a5a3b';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.ellipse(0, 12 * s, 70 * s, 14 * s, 0.05, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // rings on end
+    ctx.fillStyle = '#a87555';
+    ctx.beginPath(); ctx.ellipse(60 * s, 12 * s, 10 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#5c3a1f';
+    ctx.lineWidth = 1.5 * s;
+    for (let r = 8; r > 1; r -= 3) {
+      ctx.beginPath(); ctx.ellipse(60 * s, 12 * s, r * s, r * 1.2 * s, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    // branches with leaves
+    ctx.strokeStyle = '#5c3a1f';
+    ctx.lineWidth = 4 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-30 * s, 0); ctx.lineTo(-46 * s, -28 * s);
+    ctx.moveTo(-10 * s, -2 * s); ctx.lineTo(-2 * s, -32 * s);
+    ctx.moveTo(20 * s, -2 * s); ctx.lineTo(28 * s, -22 * s);
+    ctx.stroke();
+    ctx.fillStyle = '#6aa84f';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2.5 * s;
+    [[-46, -32, 14], [-2, -38, 16], [28, -28, 12]].forEach(([lx, ly, r]) => {
+      ctx.beginPath(); ctx.arc(lx * s, ly * s, r * s, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+    });
+    ctx.restore();
+  },
+
+  waterfall(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    const h = 110 * s;
+    // mist
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.arc(-30 * s + i * 20 * s, 30 * s + Math.sin(time * 4 + i) * 2 * s, 12 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // falling streams
+    ctx.strokeStyle = '#cfe9fb';
+    ctx.lineWidth = 5 * s;
+    ctx.lineCap = 'round';
+    for (let i = -3; i <= 3; i++) {
+      const offset = (time * 200 + i * 25) % 60;
+      ctx.globalAlpha = 0.65;
+      ctx.beginPath();
+      ctx.moveTo(i * 8 * s, -h + offset * s * 0.4);
+      ctx.lineTo(i * 8 * s, -h + offset * s * 0.4 + 28 * s);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // top splash
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.fillStyle = '#7cc4ee';
+    ctx.beginPath();
+    ctx.ellipse(0, -h, 30 * s, 8 * s, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // base splash
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.moveTo(-30 * s, 22 * s);
+    ctx.quadraticCurveTo(-40 * s, -2 * s, -16 * s, -4 * s);
+    ctx.quadraticCurveTo(0, -16 * s, 18 * s, -2 * s);
+    ctx.quadraticCurveTo(40 * s, 0, 32 * s, 22 * s);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  },
+
+  calm(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // shimmer ripples
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth = 3 * s;
+    for (let i = 0; i < 4; i++) {
+      const r = 30 * s + i * 22 * s + (time * 22 % 22) * s;
+      ctx.globalAlpha = Math.max(0, 0.7 - i * 0.18);
+      ctx.beginPath();
+      ctx.ellipse(0, 14 * s, r, r * 0.32, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // lily pad
+    ctx.fillStyle = '#6aa84f';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.arc(0, 8 * s, 24 * s, 0.15 * Math.PI, 1.9 * Math.PI);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // flower
+    ctx.fillStyle = '#ffd1e8';
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(a) * 8 * s, 8 * s + Math.sin(a) * 8 * s, 7 * s, 4 * s, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#ffd966';
+    ctx.beginPath(); ctx.arc(0, 8 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  },
+
+  bridge(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // arch
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.fillStyle = '#c08a5c';
+    ctx.beginPath();
+    ctx.moveTo(-130 * s, 20 * s);
+    ctx.quadraticCurveTo(0, -110 * s, 130 * s, 20 * s);
+    ctx.lineTo(130 * s, 6 * s);
+    ctx.quadraticCurveTo(0, -90 * s, -130 * s, 6 * s);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // planks
+    ctx.strokeStyle = '#7a4f2c';
+    ctx.lineWidth = 2 * s;
+    for (let i = -110; i <= 110; i += 20) {
+      const t = i / 130;
+      const yy = -90 * (1 - t * t) * s + 6 * s;
+      ctx.beginPath();
+      ctx.moveTo(i * s, yy);
+      ctx.lineTo(i * s, yy + 12 * s);
+      ctx.stroke();
+    }
+    // rope rails
+    ctx.strokeStyle = '#5c3a1f';
+    ctx.lineWidth = 2 * s;
+    ctx.beginPath();
+    ctx.moveTo(-130 * s, -2 * s);
+    ctx.quadraticCurveTo(0, -130 * s, 130 * s, -2 * s);
+    ctx.stroke();
+    // posts
+    ctx.fillStyle = '#7a4f2c';
+    ctx.fillRect(-138 * s, 20 * s, 10 * s, 30 * s);
+    ctx.fillRect(128 * s, 20 * s, 10 * s, 30 * s);
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.strokeRect(-138 * s, 20 * s, 10 * s, 30 * s);
+    ctx.strokeRect(128 * s, 20 * s, 10 * s, 30 * s);
+    ctx.restore();
+  },
+
+  island(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // sand
+    ctx.fillStyle = '#f1d99b';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.ellipse(0, 28 * s, 80 * s, 14 * s, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // hill
+    ctx.fillStyle = '#9bc798';
+    ctx.beginPath();
+    ctx.moveTo(-58 * s, 26 * s);
+    ctx.quadraticCurveTo(-30 * s, -8 * s, 0, -12 * s);
+    ctx.quadraticCurveTo(30 * s, -8 * s, 58 * s, 26 * s);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // palm trunk
+    ctx.strokeStyle = '#5c3a1f';
+    ctx.lineWidth = 5 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -8 * s);
+    ctx.quadraticCurveTo(6 * s, -38 * s, -2 * s, -56 * s);
+    ctx.stroke();
+    // palm leaves
+    ctx.fillStyle = '#52a26a';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2 * s;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      ctx.save();
+      ctx.translate(-2 * s, -56 * s);
+      ctx.rotate(a + 0.6);
+      ctx.beginPath();
+      ctx.ellipse(20 * s, 0, 22 * s, 9 * s, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+
+  person(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // little patch of grass
+    ctx.fillStyle = '#bcd676';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.ellipse(0, 30 * s, 50 * s, 8 * s, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // legs
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3.5 * s;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-6 * s, 28 * s); ctx.lineTo(-6 * s, 8 * s);
+    ctx.moveTo(6 * s, 28 * s);  ctx.lineTo(6 * s, 8 * s);
+    ctx.stroke();
+    // body
+    ctx.fillStyle = '#7aa6e8';
+    ctx.beginPath();
+    ctx.moveTo(-10 * s, 8 * s);
+    ctx.lineTo(10 * s, 8 * s);
+    ctx.lineTo(8 * s, -16 * s);
+    ctx.lineTo(-8 * s, -16 * s);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // head
+    ctx.fillStyle = '#f4d9b3';
+    ctx.beginPath();
+    ctx.arc(0, -26 * s, 12 * s, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // face
+    ctx.fillStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.arc(-4 * s, -28 * s, 1.6 * s, 0, Math.PI * 2);
+    ctx.arc(4 * s, -28 * s, 1.6 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2 * s;
+    ctx.beginPath();
+    ctx.arc(0, -23 * s, 4 * s, 0.1 * Math.PI, 0.9 * Math.PI);
+    ctx.stroke();
+    // waving arm
+    const wave = Math.sin(time * 6) * 0.3;
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3.5 * s;
+    ctx.beginPath();
+    ctx.moveTo(-9 * s, -10 * s);
+    ctx.lineTo(-18 * s, 4 * s);
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(9 * s, -10 * s);
+    ctx.rotate(-0.6 + wave);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(18 * s, -2 * s);
+    ctx.stroke();
+    ctx.fillStyle = '#f4d9b3';
+    ctx.beginPath();
+    ctx.arc(20 * s, -2 * s, 4 * s, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+    ctx.restore();
+  },
+
+  star(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    const positions = [
+      [-50, -30, 1.0, 0.0],
+      [40,  -50, 0.8, 0.5],
+      [55,  10,  0.6, 1.0],
+      [-35, 20,  0.7, 1.5],
+      [0,   -70, 1.1, 2.0]
+    ];
+    positions.forEach(([px, py, sc, ph]) => {
+      const pulse = 0.85 + 0.3 * Math.sin(time * 4 + ph);
+      drawStarShape(px * s, py * s, 14 * s * sc * pulse, time + ph);
+    });
+    ctx.restore();
+  },
+
+  fork(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // post
+    ctx.fillStyle = '#a47148';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.fillRect(-5 * s, -10 * s, 10 * s, 50 * s);
+    ctx.strokeRect(-5 * s, -10 * s, 10 * s, 50 * s);
+    // sign 1 (left)
+    drawSign(-44 * s, -28 * s, '◀', s, '#ffd966');
+    // sign 2 (right)
+    drawSign(44 * s, -2 * s, '▶', s, '#b4dffa');
+    ctx.restore();
+  },
+
+  dam(x, y, s, time, life) {
+    ctx.save();
+    ctx.translate(x, y);
+    // structure
+    const w = 150 * s, h = 80 * s;
+    ctx.fillStyle = '#8a8a8a';
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.rect(-w/2, -h, w, h + 14 * s);
+    ctx.fill(); ctx.stroke();
+    // bricks
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1.6 * s;
+    const bw = 30 * s, bh = 14 * s;
+    for (let row = 0; row < h / bh; row++) {
+      const yRow = -h + row * bh;
+      const off = (row % 2) * bw / 2;
+      for (let col = -w/2; col < w/2; col += bw) {
+        ctx.strokeRect(col + off, yRow, bw, bh);
+      }
+      ctx.beginPath();
+      ctx.moveTo(-w/2, yRow);
+      ctx.lineTo(w/2, yRow);
+      ctx.stroke();
+    }
+    // water over top
+    ctx.fillStyle = '#cfe9fb';
+    ctx.beginPath();
+    ctx.moveTo(-w/2, -h);
+    ctx.quadraticCurveTo(-w/4, -h - 12 * s, 0, -h);
+    ctx.quadraticCurveTo(w/4, -h + 6 * s, w/2, -h);
+    ctx.lineTo(w/2, -h + 6 * s);
+    ctx.lineTo(-w/2, -h + 6 * s);
+    ctx.closePath();
+    ctx.fill();
+    // drips
+    ctx.strokeStyle = '#7cc4ee';
+    ctx.lineWidth = 2.5 * s;
+    for (let i = -2; i <= 2; i++) {
+      const dx = i * 22 * s + Math.sin(time * 3 + i) * 3 * s;
+      ctx.beginPath();
+      ctx.moveTo(dx, -h + 10 * s);
+      ctx.lineTo(dx, -h + 30 * s);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+};
+
+function drawStarShape(x, y, r, time) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.sin(time * 1.5) * 0.1);
+  ctx.fillStyle = '#ffe066';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const rr = i % 2 === 0 ? r : r * 0.45;
+    const px = Math.cos(a) * rr;
+    const py = Math.sin(a) * rr;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  // sparkle
+  ctx.fillStyle = '#fff8d2';
+  ctx.beginPath();
+  ctx.arc(-r * 0.25, -r * 0.25, r * 0.18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSign(cx, cy, arrow, s, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3 * s;
+  ctx.beginPath();
+  if (arrow === '◀') {
+    ctx.moveTo(-30 * s, 0);
+    ctx.lineTo(-16 * s, -14 * s);
+    ctx.lineTo(30 * s, -14 * s);
+    ctx.lineTo(30 * s, 14 * s);
+    ctx.lineTo(-16 * s, 14 * s);
+  } else {
+    ctx.moveTo(30 * s, 0);
+    ctx.lineTo(16 * s, -14 * s);
+    ctx.lineTo(-30 * s, -14 * s);
+    ctx.lineTo(-30 * s, 14 * s);
+    ctx.lineTo(16 * s, 14 * s);
+  }
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#2c3e50';
+  ctx.font = `${20 * s}px 'Caveat', cursive`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(arrow === '◀' ? '◀' : '▶', 0, 0);
+  ctx.restore();
+}
+
+// =========================================================
+// POPUPS (drawn on canvas, animated per type)
+// =========================================================
+function popupTransform(type, t) {
+  // returns {x, y, scale, rot, alpha}
+  // t: 0..1 lifetime
+  const enter = Math.min(1, t / 0.18);
+  const exit = Math.max(0, (t - 0.82) / 0.18);
+  let alpha = enter * (1 - exit);
+  let scale = easeOutBack(enter) * (1 - 0.15 * exit);
+  let rot = 0, ox = 0, oy = 0;
+
+  const settled = Math.max(0, Math.min(1, (t - 0.18) / 0.6));
+
+  switch (type) {
+    case 'bump':
+      ox = enter < 1 ? 0 : Math.sin((t - 0.18) * 24) * Math.exp(-(t - 0.18) * 6) * 18;
+      break;
+    case 'shake':
+      ox = Math.sin(t * 60) * 4 * (1 - settled * 0.5);
+      oy = Math.cos(t * 55) * 3 * (1 - settled * 0.5);
+      break;
+    case 'arch':
+      oy = (1 - enter) * -80;
+      break;
+    case 'thud':
+      oy = (1 - easeOutBack(enter)) * -60;
+      break;
+    case 'tilt':
+      rot = Math.sin(t * 6) * 0.06;
+      break;
+    case 'sparkle':
+      scale = scale * (1 + 0.04 * Math.sin(t * 16));
+      break;
+    case 'wave':
+      rot = Math.sin(t * 7) * 0.04;
+      break;
+    case 'block':
+      ox = enter < 1 ? -60 * (1 - enter) : 0;
+      break;
+    case 'grow':
+      scale = enter < 1 ? enter * 1.1 : (1 - 0.05 * exit);
+      break;
+    case 'gentle':
+    default:
+      break;
+  }
+  return { ox, oy, scale, rot, alpha };
+}
+
+function drawMilestonePopup(m, lifetime01) {
+  const pInfo = MILESTONE_TYPES[m.type];
+  const tr = popupTransform(pInfo.popup, lifetime01);
+
+  const w = Math.min(W * 0.62, 720 * DPR);
+  const padX = 22 * DPR, padY = 18 * DPR;
+  const titleSize = 38 * DPR;
+  const descSize = 22 * DPR;
+  const iconSize = 60 * DPR;
+
+  const title = m.title || pInfo.label;
+  const desc = m.description || '';
+  const titleLines = wrapLines(title, `bold ${titleSize}px 'Caveat', cursive`, w - iconSize - padX * 3);
+  const descLines = wrapLines(desc, `${descSize}px 'Patrick Hand', sans-serif`, w - iconSize - padX * 3);
+
+  const titleH = titleLines.length * titleSize * 0.95;
+  const descH = descLines.length * descSize * 1.25;
+  const h = padY * 2 + Math.max(iconSize, titleH + (descLines.length ? descH + 6 * DPR : 0));
+
+  const baseX = (W - w) / 2 + tr.ox * DPR;
+  const baseY = H * 0.08 + tr.oy * DPR;
+
+  ctx.save();
+  ctx.translate(baseX + w / 2, baseY + h / 2);
+  ctx.scale(tr.scale, tr.scale);
+  ctx.rotate(tr.rot);
+  ctx.globalAlpha = tr.alpha;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(44,62,80,0.22)';
+  roundRect(-w/2 + 6 * DPR, -h/2 + 6 * DPR, w, h, 22 * DPR);
+  ctx.fill();
+  // Body
+  ctx.fillStyle = '#fffef5';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3.5 * DPR;
+  roundRect(-w/2, -h/2, w, h, 22 * DPR);
+  ctx.fill(); ctx.stroke();
+
+  // Icon circle
+  const iconCx = -w/2 + padX + iconSize / 2;
+  const iconCy = -h/2 + padY + iconSize / 2;
+  ctx.fillStyle = '#ffe7a8';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3 * DPR;
+  ctx.beginPath();
+  ctx.arc(iconCx, iconCy, iconSize / 2, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.font = `${iconSize * 0.7}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(pInfo.icon, iconCx, iconCy + 2 * DPR);
+
+  // Title
+  ctx.fillStyle = '#1a5490';
+  ctx.font = `bold ${titleSize}px 'Caveat', cursive`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  let ty = -h/2 + padY;
+  titleLines.forEach(l => { ctx.fillText(l, iconCx + iconSize / 2 + padX, ty); ty += titleSize * 0.95; });
+
+  // Description
+  ctx.fillStyle = '#2c3e50';
+  ctx.font = `${descSize}px 'Patrick Hand', sans-serif`;
+  ty += 4 * DPR;
+  descLines.forEach(l => { ctx.fillText(l, iconCx + iconSize / 2 + padX, ty); ty += descSize * 1.25; });
+
+  ctx.restore();
+}
+
+// =========================================================
+// TITLE CARD (start/end)
+// =========================================================
+function drawTitleCard(headline, body, lifetime01) {
+  const enter = Math.min(1, lifetime01 / 0.2);
+  const exit = Math.max(0, (lifetime01 - 0.8) / 0.2);
+  const alpha = enter * (1 - exit);
+  const scale = easeOutBack(enter) * (1 - 0.1 * exit);
+
+  const w = Math.min(W * 0.7, 820 * DPR);
+  const padX = 30 * DPR, padY = 26 * DPR;
+  const headSize = 56 * DPR;
+  const bodySize = 26 * DPR;
+  const headLines = wrapLines(headline, `bold ${headSize}px 'Caveat', cursive`, w - padX * 2);
+  const bodyLines = wrapLines(body, `${bodySize}px 'Patrick Hand', sans-serif`, w - padX * 2);
+  const h = padY * 2 + headLines.length * headSize * 0.95 + (bodyLines.length ? 10 * DPR + bodyLines.length * bodySize * 1.3 : 0);
+
+  const cx = W / 2;
+  const cy = H * 0.42;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.globalAlpha = alpha;
+
+  // ribbon shadow
+  ctx.fillStyle = 'rgba(44,62,80,0.28)';
+  roundRect(-w/2 + 8 * DPR, -h/2 + 8 * DPR, w, h, 28 * DPR);
+  ctx.fill();
+
+  ctx.fillStyle = '#fffef5';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 4 * DPR;
+  roundRect(-w/2, -h/2, w, h, 28 * DPR);
+  ctx.fill(); ctx.stroke();
+
+  // little decorative wave under title
+  ctx.fillStyle = '#1a5490';
+  ctx.font = `bold ${headSize}px 'Caveat', cursive`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  let yy = -h/2 + padY;
+  headLines.forEach(l => { ctx.fillText(l, 0, yy); yy += headSize * 0.95; });
+
+  // wavy divider
+  ctx.strokeStyle = '#7cc4ee';
+  ctx.lineWidth = 3 * DPR;
+  const ws = 6 * DPR, wamp = 4 * DPR;
+  ctx.beginPath();
+  for (let x = -w/2 + padX; x <= w/2 - padX; x += ws) {
+    const yyy = yy + 8 * DPR + Math.sin(x * 0.06) * wamp;
+    if (x === -w/2 + padX) ctx.moveTo(x, yyy); else ctx.lineTo(x, yyy);
+  }
+  ctx.stroke();
+  yy += 16 * DPR;
+
+  ctx.fillStyle = '#2c3e50';
+  ctx.font = `${bodySize}px 'Patrick Hand', sans-serif`;
+  bodyLines.forEach(l => { ctx.fillText(l, 0, yy); yy += bodySize * 1.3; });
+
+  ctx.restore();
+}
+
+// =========================================================
+// PROGRESS BAR
+// =========================================================
+function drawProgressBar(time) {
+  // Only show during journey
+  const journeyT = (time - INTRO) / app.duration;
+  if (journeyT < 0 || journeyT > 1) return;
+
+  const barW = W * 0.7;
+  const barH = 16 * DPR;
+  const x = (W - barW) / 2;
+  const y = H - 50 * DPR;
+
+  ctx.save();
+  // bg
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 3 * DPR;
+  roundRect(x, y, barW, barH, barH / 2);
+  ctx.fill(); ctx.stroke();
+  // fill
+  ctx.save();
+  roundRect(x, y, barW * journeyT, barH, barH / 2);
+  ctx.clip();
+  const g = ctx.createLinearGradient(x, 0, x + barW, 0);
+  g.addColorStop(0, '#7cc4ee');
+  g.addColorStop(1, '#1a5490');
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, barW, barH);
+  ctx.restore();
+
+  // milestone markers
+  app.milestones.forEach(m => {
+    const mx = x + barW * m.t;
+    ctx.font = `${22 * DPR}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(MILESTONE_TYPES[m.type].icon, mx, y - 4 * DPR);
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2 * DPR;
+    ctx.beginPath();
+    ctx.moveTo(mx, y);
+    ctx.lineTo(mx, y + barH);
+    ctx.stroke();
+  });
+
+  // boat indicator
+  const px = x + barW * journeyT;
+  ctx.fillStyle = '#ff6b6b';
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 2 * DPR;
+  ctx.beginPath();
+  ctx.arc(px, y + barH / 2, barH * 0.7, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.restore();
+}
+
+// =========================================================
+// MAIN DRAW
+// =========================================================
+function draw(time) {
+  // scrollX in world pixels — used by parallax layers
+  const journeyTime = Math.max(0, Math.min(app.duration, time - INTRO));
+  // Boat is always moving forward (even during intro/outro for visual flow)
+  const scrollX = time * 90 * DPR;
+
+  // Layer 1: sky
+  drawSky(time);
+  // Layer 2: hills (parallax)
+  drawHills(time, scrollX);
+  // Layer 3: banks
+  drawBanks(time, scrollX);
+  // Layer 4: base water
+  drawWaterBase(time);
+  // Layer 5: distant waves (behind boat, near horizon)
+  drawRiverWaves(time, scrollX, 0.66, 0.4, 0.55, Math.min(W / 900, 1.2) * DPR * 0.45);
+
+  // Layer 6: milestone scene elements (behind/around boat)
+  drawSceneMilestones(time);
+
+  // Layer 7: boat
+  drawBoat(time);
+
+  // Layer 8: foreground waves (in front of boat, below the hull)
+  drawRiverWaves(time, scrollX, 0.92, 0.8, 1.0, Math.min(W / 900, 1.2) * DPR * 0.55);
+  drawRiverWaves(time, scrollX + 200, 1.0, 0.7, 1.3, Math.min(W / 900, 1.2) * DPR * 0.55);
+
+  // Layer 9: title / end cards
+  if (time < INTRO) {
+    const lt = time / INTRO;
+    drawTitleCard(app.title, app.startText, lt);
+  } else if (time > INTRO + app.duration) {
+    const lt = (time - (INTRO + app.duration)) / OUTRO;
+    drawTitleCard('Where it leads ✦', app.endText, lt);
+  }
+
+  // Layer 10: active milestone popups
+  drawActivePopups(time);
+
+  // Layer 11: progress bar
+  drawProgressBar(time);
+}
+
+// Scene elements: each milestone visible during its window
+function drawSceneMilestones(time) {
+  const journeyT = (time - INTRO) / app.duration;
+  // Each milestone visible during a 5-second window: from t-2.5s to t+2.5s
+  app.milestones.forEach(m => {
+    const mTimeSec = INTRO + m.t * app.duration;
+    const delta = time - mTimeSec; // negative = before, positive = after
+    const sceneWindow = 4.5; // seconds total visibility (2.25 each side)
+    if (Math.abs(delta) > sceneWindow / 2) return;
+
+    // Move from right to left, passing center at delta=0
+    const halfWindow = sceneWindow / 2;
+    const life = delta / halfWindow; // -1 ... +1
+    const x = W / 2 - life * (W / 2 + 200 * DPR);
+    let y = H * 0.72;
+
+    // bob with boat
+    y += Math.sin(time * 1.8 + m.id) * 4 * DPR;
+
+    // Special placement adjustments per type
+    const scale = Math.min(W / 900, 1.4) * DPR;
+    let drawY = y;
+    if (m.type === 'bridge') drawY = H * 0.60;
+    else if (m.type === 'person') drawY = H * 0.60;
+    else if (m.type === 'tree') drawY = H * 0.68;
+    else if (m.type === 'island') drawY = H * 0.72;
+    else if (m.type === 'fork') drawY = H * 0.60;
+    else if (m.type === 'dam') drawY = H * 0.72;
+    else if (m.type === 'waterfall') drawY = H * 0.72;
+    else if (m.type === 'calm') drawY = H * 0.72;
+    else if (m.type === 'star') drawY = H * 0.50;
+    else drawY = H * 0.72;
+
+    drawByType(m.type, x, drawY, scale, time, life);
+  });
+}
+
+function drawActivePopups(time) {
+  app.milestones.forEach(m => {
+    const mTimeSec = INTRO + m.t * app.duration;
+    const popupStart = mTimeSec - 0.7;
+    const popupDur = 3.5;
+    const delta = time - popupStart;
+    if (delta < 0 || delta > popupDur) return;
+    const life = delta / popupDur;
+    drawMilestonePopup(m, life);
+  });
+}
+
+// =========================================================
+// MAP GENERATION — bird's-eye view of the full journey
+// =========================================================
+const MAP_W = 2800;
+const MAP_H = 1700;
+
+document.getElementById('map-btn').addEventListener('click', async () => {
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+  // Pull latest values from form
+  const title = (document.getElementById('story-title').value || 'My River of Life').trim();
+  const startText = document.getElementById('story-start').value.trim();
+  const endText = document.getElementById('story-end').value.trim();
+  const cv = renderMap({ title, startText, endText, milestones: app.milestones });
+  const modalCv = document.getElementById('map-canvas');
+  modalCv.width = cv.width;
+  modalCv.height = cv.height;
+  modalCv.getContext('2d').drawImage(cv, 0, 0);
+  document.getElementById('map-modal').hidden = false;
+});
+
+document.getElementById('map-close-btn').addEventListener('click', () => {
+  document.getElementById('map-modal').hidden = true;
+});
+
+document.getElementById('map-download-btn').addEventListener('click', () => {
+  const cvs = document.getElementById('map-canvas');
+  cvs.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'river-of-life-map.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }, 'image/png');
+});
+
+function renderMap({ title, startText, endText, milestones }) {
+  const W = MAP_W, H = MAP_H;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+
+  mapDrawBackground(c, W, H);
+  mapDrawDecorations(c, W, H);
+  mapDrawTitle(c, W, title);
+
+  const path = mapComputeRiver(W, H, 260, 0.51, 3, 200);
+  mapDrawRiver(c, path);
+
+  const sorted = [...milestones].sort((a, b) => a.t - b.t);
+  mapDrawMilestones(c, W, H, path, sorted);
+
+  mapDrawStartEnd(c, W, H, path, startText, endText);
+  mapDrawCompass(c, W - 165, H - 165);
+  mapDrawSignature(c, W, H);
+
+  return cv;
+}
+
+function mapDrawBackground(c, W, H) {
+  const g = c.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#fef9e7');
+  g.addColorStop(1, '#f1e2b8');
+  c.fillStyle = g;
+  c.fillRect(0, 0, W, H);
+
+  // Vignette
+  const vg = c.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, Math.max(W, H)*0.65);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(101,67,33,0.22)');
+  c.fillStyle = vg;
+  c.fillRect(0, 0, W, H);
+
+  // Parchment speckles (stable seed)
+  let seed = 12345;
+  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  for (let i = 0; i < 900; i++) {
+    const x = rand() * W;
+    const y = rand() * H;
+    c.fillStyle = `rgba(101,67,33,${0.04 + rand() * 0.05})`;
+    c.fillRect(x, y, 2, 2);
+  }
+
+  // Border frame
+  c.strokeStyle = 'rgba(101,67,33,0.55)';
+  c.lineWidth = 6;
+  c.strokeRect(30, 30, W - 60, H - 60);
+  c.strokeStyle = 'rgba(101,67,33,0.3)';
+  c.lineWidth = 2;
+  c.strokeRect(45, 45, W - 90, H - 90);
+}
+
+function mapDrawTitle(c, W, title) {
+  c.save();
+  // Banner text
+  c.fillStyle = '#1a5490';
+  c.font = "bold 108px 'Caveat', cursive";
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText(`~ ${title} ~`, W/2, 120);
+
+  // Wavy underline
+  c.strokeStyle = '#7cc4ee';
+  c.lineWidth = 6;
+  c.lineCap = 'round';
+  c.beginPath();
+  const lx = W*0.30, rx = W*0.70;
+  for (let x = lx; x <= rx; x += 8) {
+    const yy = 195 + Math.sin((x - lx) * 0.045) * 7;
+    if (x === lx) c.moveTo(x, yy); else c.lineTo(x, yy);
+  }
+  c.stroke();
+  c.restore();
+}
+
+function mapComputeRiver(W, H, margin, midYFrac, cycles, amp) {
+  const path = [];
+  const samples = 280;
+  const cy = H * midYFrac;
+  const usableW = W - margin * 2;
+  for (let i = 0; i <= samples; i++) {
+    const t = i / samples;
+    const x = margin + t * usableW;
+    const y = cy + Math.sin(t * Math.PI * cycles) * amp;
+    const dx = usableW;
+    const dy = amp * Math.PI * cycles * Math.cos(t * Math.PI * cycles);
+    const len = Math.hypot(dx, dy);
+    path.push({ x, y, t, tx: dx/len, ty: dy/len });
+  }
+  return path;
+}
+
+function mapDrawRiver(c, path) {
+  c.lineCap = 'round';
+  c.lineJoin = 'round';
+  const stroke = (color, width) => {
+    c.strokeStyle = color; c.lineWidth = width;
+    c.beginPath();
+    path.forEach((p, i) => i === 0 ? c.moveTo(p.x, p.y) : c.lineTo(p.x, p.y));
+    c.stroke();
+  };
+  stroke('rgba(101, 67, 33, 0.18)', 200);
+  stroke('#e9d2a0', 170);
+  stroke('#b6d27e', 142);
+  stroke('#7cc4ee', 94);
+  stroke('#a8dbf2', 66);
+  stroke('rgba(255,255,255,0.45)', 28);
+
+  // Dark edges along the water
+  const off = 48;
+  const edge1 = path.map(p => ({ x: p.x + p.ty * off, y: p.y - p.tx * off }));
+  const edge2 = path.map(p => ({ x: p.x - p.ty * off, y: p.y + p.tx * off }));
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  edge1.forEach((p, i) => i === 0 ? c.moveTo(p.x, p.y) : c.lineTo(p.x, p.y));
+  c.stroke();
+  c.beginPath();
+  edge2.forEach((p, i) => i === 0 ? c.moveTo(p.x, p.y) : c.lineTo(p.x, p.y));
+  c.stroke();
+
+  // Ripple marks (perpendicular short dashes)
+  c.strokeStyle = 'rgba(255,255,255,0.9)';
+  c.lineWidth = 3;
+  for (let i = 10; i < path.length - 10; i += 8) {
+    const p = path[i];
+    const wo = ((i % 16) - 8) * 1.4;
+    const halflen = 9;
+    c.beginPath();
+    c.moveTo(p.x + p.ty * halflen + p.tx * wo, p.y - p.tx * halflen + p.ty * wo);
+    c.lineTo(p.x - p.ty * halflen + p.tx * wo, p.y + p.tx * halflen + p.ty * wo);
+    c.stroke();
+  }
+
+  // Little grass tufts on the banks
+  c.strokeStyle = '#5a7a32';
+  c.lineWidth = 3;
+  for (let i = 6; i < path.length - 6; i += 14) {
+    const p = path[i];
+    for (const side of [1, -1]) {
+      const bx = p.x + side * p.ty * 75;
+      const by = p.y - side * p.tx * 75;
+      c.beginPath();
+      c.moveTo(bx, by);
+      c.lineTo(bx - 4, by - 12);
+      c.moveTo(bx, by);
+      c.lineTo(bx, by - 14);
+      c.moveTo(bx, by);
+      c.lineTo(bx + 4, by - 12);
+      c.stroke();
+    }
+  }
+}
+
+function mapDrawMilestones(c, W, H, path, milestones) {
+  const topLane = 360;
+  const botLane = H - 540;
+  const badgeW = 440, badgeH = 220;
+  // Two lanes alternating by sorted index
+  const above = [], below = [];
+  milestones.forEach((m, i) => (i % 2 === 0 ? above : below).push(m));
+  // Lay each lane out from left to right, clamping to canvas bounds
+  const layoutLane = (list, laneY) => {
+    let lastRight = 130;
+    return list.map(m => {
+      const t = Math.max(0, Math.min(1, m.t));
+      const riverIdx = Math.round(t * (path.length - 1));
+      const rp = path[riverIdx];
+      let badgeX = rp.x;
+      // Keep badge within canvas
+      badgeX = Math.max(140 + badgeW/2, Math.min(W - 140 - badgeW/2, badgeX));
+      // Prevent overlap with previous
+      if (badgeX - badgeW/2 < lastRight + 24) badgeX = lastRight + 24 + badgeW/2;
+      lastRight = badgeX + badgeW/2;
+      return { m, rp, badgeX, badgeY: laneY };
+    });
+  };
+  const aboveLaid = layoutLane(above, topLane);
+  const belowLaid = layoutLane(below, botLane);
+  [...aboveLaid, ...belowLaid].forEach(({ m, rp, badgeX, badgeY }) => {
+    mapDrawMilestoneBadge(c, m, badgeX, badgeY, rp, badgeW, badgeH);
+  });
+}
+
+function mapDrawMilestoneBadge(c, m, x, y, rp, w, h) {
+  const info = MILESTONE_TYPES[m.type];
+  const aboveRiver = y < rp.y;
+
+  // Connector line from river marker to badge edge
+  c.strokeStyle = '#5d6d7e';
+  c.lineWidth = 3;
+  c.setLineDash([10, 8]);
+  c.beginPath();
+  c.moveTo(rp.x, rp.y);
+  c.lineTo(x, aboveRiver ? y + h/2 : y - h/2);
+  c.stroke();
+  c.setLineDash([]);
+
+  // River marker
+  c.fillStyle = '#ff6b6b';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(rp.x, rp.y, 16, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+
+  // Badge shadow
+  c.fillStyle = 'rgba(44,62,80,0.22)';
+  mapRoundRect(c, x - w/2 + 8, y - h/2 + 8, w, h, 22);
+  c.fill();
+
+  // Body
+  c.fillStyle = '#fffef5';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  mapRoundRect(c, x - w/2, y - h/2, w, h, 22);
+  c.fill(); c.stroke();
+
+  // Icon disc
+  const iconR = 55;
+  const iconX = x - w/2 + iconR + 22;
+  const iconY = y - h/2 + iconR + 22;
+  c.fillStyle = '#ffe7a8';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(iconX, iconY, iconR, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+  c.font = `${iconR * 1.25}px sans-serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText(info.icon, iconX, iconY + 4);
+
+  // Title
+  const txtX = x - w/2 + iconR * 2 + 38;
+  const maxTxt = w - (txtX - (x - w/2)) - 24;
+  c.fillStyle = '#1a5490';
+  c.font = "bold 42px 'Caveat', cursive";
+  c.textAlign = 'left';
+  c.textBaseline = 'top';
+  const titleLines = mapWrap(c, m.title || info.label, maxTxt);
+  let yy = y - h/2 + 22;
+  titleLines.slice(0, 2).forEach(l => { c.fillText(l, txtX, yy); yy += 40; });
+
+  // Description
+  c.fillStyle = '#2c3e50';
+  c.font = "26px 'Patrick Hand', sans-serif";
+  yy += 4;
+  const descLines = mapWrap(c, m.description || '', maxTxt);
+  descLines.slice(0, 3).forEach(l => { c.fillText(l, txtX, yy); yy += 32; });
+}
+
+function mapDrawStartEnd(c, W, H, path, startText, endText) {
+  const s = path[0];
+  const e = path[path.length - 1];
+
+  // Start marker — X on river + label
+  mapXMark(c, s.x, s.y, 18);
+  c.fillStyle = '#1a5490';
+  c.font = "bold 52px 'Caveat', cursive";
+  c.textAlign = 'right';
+  c.textBaseline = 'middle';
+  c.fillText('Start ↘', s.x - 30, s.y - 70);
+
+  // End marker — flag + label
+  mapFlag(c, e.x, e.y);
+  c.fillStyle = '#1a5490';
+  c.font = "bold 52px 'Caveat', cursive";
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.fillText('↗ Onward', e.x + 30, e.y - 80);
+
+  // Sticky-note style start/end text
+  if (startText) mapDrawSticky(c, 110, H - 460, 880, 280, startText, '✦ Where it started', -0.025, '#fff6c2');
+  if (endText) mapDrawSticky(c, W - 990, H - 460, 880, 280, endText, '✦ Where it leads', 0.025, '#d4f0d2');
+}
+
+function mapDrawSticky(c, x, y, w, h, text, heading, tilt, color) {
+  c.save();
+  c.translate(x + w/2, y + h/2);
+  c.rotate(tilt);
+
+  // Shadow
+  c.fillStyle = 'rgba(44,62,80,0.25)';
+  mapRoundRect(c, -w/2 + 10, -h/2 + 10, w, h, 14);
+  c.fill();
+
+  // Body
+  c.fillStyle = color;
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 3.5;
+  mapRoundRect(c, -w/2, -h/2, w, h, 14);
+  c.fill(); c.stroke();
+
+  // Heading
+  c.fillStyle = '#1a5490';
+  c.font = "bold 42px 'Caveat', cursive";
+  c.textAlign = 'left';
+  c.textBaseline = 'top';
+  c.fillText(heading, -w/2 + 28, -h/2 + 22);
+
+  // Wavy underline
+  c.strokeStyle = '#7cc4ee';
+  c.lineWidth = 3;
+  c.beginPath();
+  for (let x2 = -w/2 + 28; x2 < -w/2 + 28 + 320; x2 += 6) {
+    const yy = -h/2 + 78 + Math.sin((x2 + w/2 - 28) * 0.06) * 4;
+    if (x2 === -w/2 + 28) c.moveTo(x2, yy); else c.lineTo(x2, yy);
+  }
+  c.stroke();
+
+  // Body text
+  c.fillStyle = '#2c3e50';
+  c.font = "30px 'Patrick Hand', sans-serif";
+  const lines = mapWrap(c, text, w - 56);
+  let yy2 = -h/2 + 102;
+  lines.slice(0, 5).forEach(l => { c.fillText(l, -w/2 + 28, yy2); yy2 += 38; });
+
+  c.restore();
+}
+
+function mapXMark(c, x, y, r) {
+  c.save();
+  c.strokeStyle = '#c0392b';
+  c.lineWidth = 8;
+  c.lineCap = 'round';
+  c.beginPath();
+  c.moveTo(x - r, y - r); c.lineTo(x + r, y + r);
+  c.moveTo(x + r, y - r); c.lineTo(x - r, y + r);
+  c.stroke();
+  c.restore();
+}
+
+function mapFlag(c, x, y) {
+  c.save();
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 5;
+  c.lineCap = 'round';
+  c.beginPath();
+  c.moveTo(x, y + 8);
+  c.lineTo(x, y - 70);
+  c.stroke();
+  c.fillStyle = '#c0392b';
+  c.beginPath();
+  c.moveTo(x, y - 70);
+  c.lineTo(x + 60, y - 60);
+  c.lineTo(x + 36, y - 48);
+  c.lineTo(x + 60, y - 36);
+  c.lineTo(x, y - 36);
+  c.closePath();
+  c.fill(); c.stroke();
+  c.restore();
+}
+
+function mapDrawCompass(c, x, y) {
+  c.save();
+  c.translate(x, y);
+  const r = 78;
+  // Outer rim
+  c.fillStyle = '#fffacd';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 5;
+  c.beginPath();
+  c.arc(0, 0, r, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+  // Inner ring
+  c.strokeStyle = '#7a4f2c';
+  c.lineWidth = 2;
+  c.beginPath();
+  c.arc(0, 0, r - 12, 0, Math.PI * 2);
+  c.stroke();
+  // North arrow (red)
+  c.fillStyle = '#c0392b';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(0, -r * 0.82);
+  c.lineTo(-14, 0);
+  c.lineTo(0, 14);
+  c.lineTo(14, 0);
+  c.closePath();
+  c.fill(); c.stroke();
+  // South arrow (cream)
+  c.fillStyle = '#fffef5';
+  c.beginPath();
+  c.moveTo(0, r * 0.82);
+  c.lineTo(-14, 0);
+  c.lineTo(0, -14);
+  c.lineTo(14, 0);
+  c.closePath();
+  c.fill(); c.stroke();
+  // Letters
+  c.fillStyle = '#1a5490';
+  c.font = "bold 30px 'Caveat', cursive";
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText('N', 0, -r - 18);
+  c.fillText('S', 0, r + 18);
+  c.fillText('W', -r - 20, 0);
+  c.fillText('E', r + 20, 0);
+  c.restore();
+}
+
+function mapDrawDecorations(c, W, H) {
+  // Sun in top-right of map
+  c.save();
+  c.translate(W - 240, 200);
+  c.strokeStyle = '#ffae33';
+  c.lineWidth = 5;
+  c.lineCap = 'round';
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    c.beginPath();
+    c.moveTo(Math.cos(a) * 55, Math.sin(a) * 55);
+    c.lineTo(Math.cos(a) * 75, Math.sin(a) * 75);
+    c.stroke();
+  }
+  c.fillStyle = '#ffd34d';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(0, 0, 46, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+  c.fillStyle = '#2c3e50';
+  c.beginPath();
+  c.arc(-15, -10, 4, 0, Math.PI * 2);
+  c.arc(15, -10, 4, 0, Math.PI * 2);
+  c.fill();
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(0, 4, 20, 0.15 * Math.PI, 0.85 * Math.PI);
+  c.stroke();
+  c.restore();
+
+  // Clouds top-left
+  mapCloud(c, 280, 190, 1.1);
+  mapCloud(c, 600, 130, 0.85);
+  mapCloud(c, 1100, 200, 0.9);
+
+  // Small trees in scattered map regions
+  const trees = [
+    [180, H * 0.36, 0.85],
+    [W - 220, H * 0.36, 0.95],
+    [200, H * 0.78, 0.9],
+    [W - 240, H * 0.78, 0.85]
+  ];
+  trees.forEach(([x, y, s]) => mapTree(c, x, y, s));
+}
+
+function mapCloud(c, x, y, s) {
+  c.save();
+  c.translate(x, y);
+  c.scale(s, s);
+  c.fillStyle = '#fff';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.beginPath();
+  c.arc(-36, 0, 30, 0, Math.PI * 2);
+  c.arc(-6, -14, 36, 0, Math.PI * 2);
+  c.arc(30, -2, 28, 0, Math.PI * 2);
+  c.arc(0, 10, 26, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+  c.restore();
+}
+
+function mapTree(c, x, y, s) {
+  c.save();
+  c.translate(x, y);
+  c.scale(s, s);
+  // trunk
+  c.fillStyle = '#7a4f2c';
+  c.strokeStyle = '#2c3e50';
+  c.lineWidth = 4;
+  c.fillRect(-9, 0, 18, 56);
+  c.strokeRect(-9, 0, 18, 56);
+  // leaves
+  c.fillStyle = '#6aa84f';
+  c.beginPath();
+  c.arc(0, -14, 40, 0, Math.PI * 2);
+  c.arc(-28, 6, 30, 0, Math.PI * 2);
+  c.arc(28, 6, 30, 0, Math.PI * 2);
+  c.fill(); c.stroke();
+  // little dots for texture
+  c.fillStyle = '#52a26a';
+  c.beginPath();
+  c.arc(-15, -20, 6, 0, Math.PI * 2);
+  c.arc(10, -8, 5, 0, Math.PI * 2);
+  c.arc(20, 14, 5, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+}
+
+function mapDrawSignature(c, W, H) {
+  c.fillStyle = '#5d6d7e';
+  c.font = "italic 30px 'Patrick Hand', sans-serif";
+  c.textAlign = 'left';
+  c.textBaseline = 'bottom';
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  c.fillText(`— Drawn ${date} —`, 80, H - 70);
+}
+
+function mapRoundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r);
+  c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r);
+  c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
+}
+
+function mapWrap(c, text, maxWidth) {
+  const words = (text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (c.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+// =========================================================
+// Wait for fonts before starting (so canvas text renders correctly)
+// =========================================================
+(async function init() {
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+})();
+
+</script>
+
+</body>
+</html>
